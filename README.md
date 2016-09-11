@@ -1,4 +1,6 @@
-Check out: http://devpost.com/software/aaa-67fakr
+Check out: http://devpost.com/software/aaa-67fakr for more details
+
+For a brief demo: https://www.youtube.com/watch?v=1vnHadw-2k8
 
 I, Trainer is a robotic personal trainer capable of offering encouragement, and keeping track of your exercises.
 
