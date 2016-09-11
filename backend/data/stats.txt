@@ -1,0 +1,9 @@
+pushups:5
+pushups:10
+pushups:10
+pushups:25
+pushups:15
+pushups:25
+pushups:40
+pushups:35
+pushups:50

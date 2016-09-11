@@ -1,0 +1,89 @@
+* {
+-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body{
+margin: 0px;
+}
+
+h2 {
+  color: #00B092;
+  text-align: center;
+  font-size: 40px;
+  font-family: "Helvetica";
+}
+
+#canvas-container {
+  height: 500px;
+  width: 900px;
+  margin-left: 150px;
+}
+
+.action-button {
+  display: table;
+  margin: auto;
+  text-decoration: none;
+  background-color: #00B092;
+  color: white;
+  font-family: "Helvetica";
+  height: 50px;
+  width: 300px;
+  text-align: center;
+  border-radius: 30px;
+  font-size: 25px;
+  border-style: none;
+  cursor: pointer;
+  outline: none;
+}
+
+#difficulty-label {
+  color: #555;
+  text-align: center;
+  font-size: 40px;
+  font-family: "Helvetica";
+  font-size: 30px;
+	margin-top: 120px;
+	margin-bottom: 50px;
+}
+
+.difficulty-button {
+  display: table;
+  margin: auto;
+  text-decoration: none;
+  background-color: #00B092;
+  color: white;
+  font-family: "Helvetica";
+  height: 70px;
+  width: 300px;
+  text-align: center;
+  border-radius: 35px;
+  font-size: 25px;
+  border-style: none;
+  cursor: pointer;
+  outline: none;
+  margin-top: 30px;
+}
+
+.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-right: -50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.bigfriendlybutton {
+  border-radius: 25px;
+  display: inline-block;
+  width: 300px;
+  height: 100px;
+  background-color: blue;
+  color: white;
+  text-align: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 35px;
+  font-style: normal;
+  font-weight: bold;
+  line-height: 50px;
+}

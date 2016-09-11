@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- needed to scale tablet display -->
+    <meta name="viewport"
+          content="initial-scale = 1.333,
+          minimum-scale = 1.333,
+          maximum-scale = 1.333" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.2.2/Chart.bundle.min.js"></script>
+
+    <!-- application css -->
+    <link media="screen" href="css/style.css" rel="stylesheet" type="text/css">
+
+</head>
+<body class="unselectable">
+    <div id="homepage">
+        <h2>Welcome Ryan.</h2>
+        <div id="canvas-container" style="margin-left: 200px">
+            <canvas id="chart"></canvas>
+        </div>
+        <button id="exercise-button" class="action-button" href="#">Begin Exercising</button>
+    </div>
+    <div id="difficulty">
+        <h1 id="difficulty-label">Select intensity for your workout</h1>
+        <div style="width: 100%">
+            <button id="beginner" class="difficulty-button" href="#">Easy</button>
+        </div>
+        <div style="width: 100%">
+            <button id="intermediate" class="difficulty-button" href="#">Intermediate</button>
+        </div>
+        <div style="width: 100%">
+            <button id="advanced" class="difficulty-button" href="#">Advanced</button>
+        </div>
+    </div>
+    <div id="counter">
+        <div id="canvas-container" style="margin-top: 50px; margin-left: 187px; margin-bottom: 80px;">
+            <canvas id="counter-chart"></canvas>
+        </div>
+        <button id="done-button" class="action-button">Done</button>
+    </div>
+
+
+    <!-- qimessaging & jquery stuff -->
+    <script src="js/jquery-1.11.0.min.js"></script>
+    <script src="js/robotutils.js"></script>
+    <!-- <script src="js/main.js"></script> -->
+    <!-- application script call -->
+    <script type="text/javascript">
+
+        var url = "https://floating-plains-14230.herokuapp.com/data";
+        var callIncrementRep; // Call this function to update the pie chart
+        var exerciseCompleted = false;
+				var doingExercise = false;
+        var mostRecentExerciseCompleted = 0;
+        var exercise = {
+            "beginner": 3,
+            "intermediate": 20,
+            "advanced": 40
+        };
+				var pushupsToDo = 0;
+
+        var lineChart;
+        var repChart;
+
+				function transitionToDifficulty(){
+            $("#homepage").css("display", "none");
+            $("#difficulty").css("display", "block");
+            $("#counter").css("display", "none");
+        }
+
+        function transitionToExercise(){
+            $("#homepage").css("display", "none");
+            $("#difficulty").css("display", "none");
+            $("#counter").css("display", "block");
+
+            exerciseCompleted = false;
+
+            var difficulty = $(this).attr("id");
+            var numPushups = exercise[difficulty];
+
+						pushupsToDo = numPushups;
+
+            buildCounter(numPushups);
+        }
+
+				function transitionToExerciseSpeech(difficulty){
+					$("#homepage").css("display", "none");
+					$("#difficulty").css("display", "none");
+					$("#counter").css("display", "block");
+
+					exerciseCompleted = false;
+
+					var numPushups = exercise[difficulty];
+
+					pushupsToDo = numPushups;
+
+					buildCounter(numPushups);
+				}
+
+        function transitionToHomepage(){
+            if(exerciseCompleted == true){
+                // var xhr = createCORSRequest("POST", url, true);
+                // if(!xhr){
+                //     console.log("CORS not supported.");
+                // }
+
+                // xhr.onload = function(){
+                //     // Add new data to line chart
+                //     lineChart.update();
+                // }
+
+                // Send data to server
+                // xhr.send({
+                //     'exercise':'pushups',
+                //     'count':mostRecentExerciseCompleted
+                // });
+
+                lineChart['config']['data']['datasets'][0]['data'].push(mostRecentExerciseCompleted);
+                var labels = lineChart['config']['data']['labels'];
+                labels.push("Session " + (labels.length + 1));
+                lineChart.update();
+            }
+
+            $("#homepage").css("display", "block");
+            $("#difficulty").css("display", "none");
+            $("#counter").css("display", "none");
+        }
+
+				var application = function(){
+						var i = 0;
+						RobotUtils.onService(function(ALTactileGesture, ALTextToSpeech, ALAnimationPlayer, ALMemory, ALBehaviorManager, ALPhotoCapture) {
+							console.log("Ready to play");
+
+							ALMemory.raiseEvent('training/song', 'nameOfSong');
+
+							// ALSpeechRecognition.subscribe("dialogue_key");
+							// ALSpeechRecognition.unsubscribe("dialogue_key")
+							// console.log("voice recognized");
+
+
+							RobotUtils.subscribeToALMemoryEvent('ready', function(value) {
+								console.log(value);
+								if (value == 1) {
+									transitionToDifficulty();
+								} else if (value == 2) {
+									transitionToExerciseSpeech("beginner");
+									doingExercise = true;
+								} else if (value == 3){
+									transitionToExerciseSpeech("intermediate");
+									doingExercise = true;
+								} else if (value == 4){
+									transitionToExerciseSpeech("advanced")
+									doingExercise = true;
+								}
+
+
+							});
+
+							RobotUtils.subscribeToALMemoryEvent('LeftBumperPressed', function(value) {
+
+							 if (value == "0") {
+								 ALAnimationPlayer.run("animations/Stand/Gestures/Enthusiastic_5");
+								 i = i + 1;
+								 callIncrementRep();
+								 console.log(i);
+								 ALTextToSpeech.say(i.toString());
+								 
+								 if (doingExercise == true && i < pushupsToDo) {
+										console.log("triggered");
+										ALMemory.raiseEvent('training/timer', 'timer');
+									}
+
+								 if (i == pushupsToDo) {
+									 i = 0;
+									 doingExercise = false;
+									 ALTextToSpeech.say("Tada! You are done!");
+									 ALMemory.raiseEvent('training/disco', 'disco');
+									//  ALPhotoCapture.setResolution(2)
+									//  ALPhotoCapture.setPictureFormat("jpg")
+									//  var photos = ALPhotoCapture.takePictures(3, "/home/nao/recordings/cameras/", "image")
+									//  console.log(photos);
+
+								 }
+							 } else if (value == "1") {
+								//  if (doingExercise && i < pushupsToDo) {
+								// 	 console.log("triggered");
+								// 	 ALMemory.raiseEvent('training/timer', 'timer');
+								//  }
+
+							 }
+
+							});
+				    });
+				}
+
+        $(document).ready(function(e){
+            var app = application();
+            setup();
+        })
+
+        function setup(){
+
+            $("#difficulty").css("display", "none");
+            $("#counter").css("display", "none");
+
+            sendCORSRequest();
+            drawCounter();
+        }
+
+        function sendCORSRequest(){
+            var xhr = createCORSRequest("GET", url, true);
+            if(!xhr){
+                console.log("CORS not supported.");
+            }
+
+            xhr.onload = function() {
+                fitnessData = JSON.parse(xhr.responseText);
+                processData(fitnessData);
+            }
+
+            xhr.send();
+        }
+
+        function createCORSRequest(method, url, async){
+            var xhr = new XMLHttpRequest();
+            if("withCredentials" in xhr) {
+                xhr.open(method, url, async);
+            }else if(typeof XDomainRequest != "undefined") {
+                xhr = XDomainRequest();
+                xhr.open(method, url);
+            }else{
+                xhr = null;
+            }
+            return xhr;
+        }
+
+        function requestData(){
+            var xhttp;
+            if(window.XMLHttpRequest){
+                xhttp = new XMLHttpRequest();
+            }
+
+            // Function called once HTTP response is received
+            xhttp.onreadystatechange = function(){
+                if(xhttp.readyState == 4 && xhttp.status == 200){
+                    fitnessData = JSON.parse(xhttp.responseText);
+                    processData(fitnessData);
+                }
+            }
+
+            xhttp.open("GET", "https://floating-plains-14230.herokuapp.com/data", true);
+            xhttp.send();
+        }
+
+        function processData(data){
+
+            var ctx = document.getElementById("chart");
+
+            var pushups = data["data"]["pushups"];
+
+            var labels = [];
+            for(var i = 1; i <= pushups.length; i++){
+                labels.push("Session " + i);
+            }
+
+            var data = {
+                labels: labels,
+                datasets: [
+                        {
+                            label: "Pushups",
+                            fill: true,
+                            lineTension: 0.4,
+                            backgroundColor: "rgba(75,192,192,0.4)",
+                            borderColor: "rgba(75,192,192,1)",
+                            borderCapStyle: 'butt',
+                            borderDash: [],
+                            borderDashOffset: 0.0,
+                            borderJoinStyle: 'miter',
+                            pointBorderColor: "rgba(75,192,192,1)",
+                            pointBackgroundColor: "#fff",
+                            pointBorderWidth: 1,
+                            pointHoverRadius: 5,
+                            pointHoverBackgroundColor: "rgba(75,192,192,1)",
+                            pointHoverBorderColor: "rgba(220,220,220,1)",
+                            pointHoverBorderWidth: 2,
+                            pointRadius: 3,
+                            pointHitRadius: 10,
+                            data: pushups,
+                            spanGaps: false,
+                        }
+                    ]
+            };
+            var options = {
+                scales: {
+                    yAxes: [{
+                        display: true,
+                        ticks: {
+                            beginAtZero: true,
+                            suggestedMax: 80
+                        }
+                    }]
+                }
+            };
+
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: data,
+                options: options
+            });
+        }
+
+        function drawCounter(){
+            var ctx = document.getElementById("counter-chart");
+
+            var data = {
+                labels: [
+                    "Done",
+                    "Left"
+                ],
+                datasets: [
+                    {
+                        data: [0, 0],
+                        backgroundColor: [ "#00B092", "#777777"],
+                        hoverBackgroundColor: [ "#00B092", "#777777"]
+                    }
+                ]
+            };
+
+            var options = {};
+
+            repChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: data,
+                options: options
+            });
+        }
+
+        $("#exercise-button").click(transitionToDifficulty);
+
+        $(".difficulty-button").click(transitionToExercise);
+
+        function buildCounter(reps){
+
+            var repData = repChart['config']['data']['datasets'][0]['data'];
+
+            repData[0] = 0;
+            repData[1] = reps;
+            repChart.update();
+
+            callIncrementRep = function incrementRep(){
+                if(repData[1] > 0){
+                    repData[0] += 1;
+                    repData[1] -= 1;
+                }
+                repChart.update();
+                if(repData[1] == 0){
+                    mostRecentExerciseCompleted = repData[0]
+                    exerciseCompleted = true;
+                }
+            }
+        }
+
+        $("#done-button").click(transitionToHomepage);
+
+    </script>
+</body>
+</html>

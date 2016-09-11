@@ -1,0 +1,21 @@
+topic: ~dialogue()
+language: enu
+
+# Defining extra concepts out of words or group of words
+#concept:(hello) [hello hi hey "good morning" greetings]
+
+# Catching inputs and triggering outputs
+#u:(e:onStart) $onStopped=1
+
+# Replying to speech
+#u:(~hello) ~hello
+
+u:(pepper) Hello Ryan. Which level do you wanna do? $ready=1
+
+u:(easy) Start doing push up! $ready=2
+
+u:(intermediate) Start doing push up! $ready=3
+
+u:(advanced) Start doing push up! $ready=4
+
+u:(e:trainer/toolate) faster 
